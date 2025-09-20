@@ -1,4 +1,6 @@
 // /api/consulta.js
+console.log("⚙️ API /api/consulta chamada com:", req.method, req.query, req.body);
+
 export default async function handler(req, res) {
   let { tipo, cnpj, token } = req.query;
 
@@ -48,5 +50,7 @@ export default async function handler(req, res) {
   } catch (erro) {
     console.error("Erro interno:", erro);
     return res.status(500).json({ erro: "Erro interno do servidor." });
+console.error("🔥 ERRO consulta.js:", erro);
+
   }
 }
