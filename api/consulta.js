@@ -1,36 +1,52 @@
-// api/consulta.js
+// /api/consulta.js
 export default async function handler(req, res) {
   let { tipo, cnpj, token } = req.query;
 
-  // Se for POST, pega do body
   if (req.method === 'POST') {
-  cnpj = req.body.cnpj;
-  token = req.body.token;
-  tipo = req.body.tipo || tipo;
-}
+    cnpj = req.body.cnpj;
+    token = req.body.token;
+    tipo = req.body.tipo || tipo;
+  }
 
-if (tipo === 'parceirosLogin') {
+  // Whitelist de tipo permitido
+  if (tipo !== 'parceirosLogin') {
+    return res.status(400).json({ erro: 'Tipo de consulta inválido.' });
+  }
+
   try {
     const baseId = process.env.AIRTABLE_BASE_ID;
     const tabela = process.env.AIRTABLE_PARCEIROS;
     const apiKey = process.env.AIRTABLE_API_KEY;
 
-    const url = `https://api.airtable.com/v0/${baseId}/${tabela}?filterByFormula=AND({A cnpj}='${cnpj}', {A token}='${token}', {A ativo}='SIM')`;
+    // ⚠️ Certifique-se de que os campos estão exatamente assim no Airtable
+    const formula = `AND({A cnpj}='${cnpj}', {A token}='${token}', {A ativo}='SIM')`;
+
+    const url = `https://api.airtable.com/v0/${baseId}/${tabela}?filterByFormula=${encodeURIComponent(formula)}`;
 
     const resposta = await fetch(url, {
-      headers: { Authorization: `Bearer ${apiKey}` }
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      }
     });
 
     const dados = await resposta.json();
-    console.log("Resposta do Airtable:", dados);
 
-    if (dados.records && dados.records.length > 0) {
-      res.status(200).json(dados.records[0].fields);
+    if (dados?.records?.length > 0) {
+      const parceiro = dados.records[0].fields;
+
+      // 🔐 Limpeza da resposta
+      return res.status(200).json({
+        cnpj: parceiro["A cnpj"],
+        nome: parceiro["A nome"] || "",
+        whatsapp: parceiro.whatsapp || "",
+        instagram: parceiro.instagram || ""
+      });
     } else {
-      res.status(401).json({ status: 'erro', mensagem: 'CNPJ ou Token inválidos' });
+      return res.status(401).json({ erro: "CNPJ ou Token inválidos." });
     }
+
   } catch (erro) {
-    console.error('Erro interno:', erro);
-    res.status(500).json({ status: 'erro', mensagem: 'Erro interno do servidor' });
+    console.error("Erro interno:", erro);
+    return res.status(500).json({ erro: "Erro interno do servidor." });
   }
 }
