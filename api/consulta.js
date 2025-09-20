@@ -17,7 +17,8 @@ export default async function handler(req, res) {
     const tabela = process.env.AIRTABLE_PARCEIROS;
     const apiKey = process.env.AIRTABLE_API_KEY;
 
-    const formula = `AND({A cnpj}='${cnpj}', {A token}='${token}', {A ativo}='SIM')`;
+    const formula = `AND({A cnpj}='${cnpj}', {A token}='${token}', {A ativo}=1
+)`;
 
     const url = `https://api.airtable.com/v0/${baseId}/${tabela}?filterByFormula=${encodeURIComponent(formula)}`;
 
