@@ -15,7 +15,7 @@ if (tipo === 'parceirosLogin') {
     const tabela = process.env.AIRTABLE_PARCEIROS;
     const apiKey = process.env.AIRTABLE_API_KEY;
 
-    const url = `https://api.airtable.com/v0/${baseId}/${tabela}?filterByFormula=AND({cnpj}='${cnpj}', {token}='${token}', {ativo}=1)`;
+    const url = `https://api.airtable.com/v0/${baseId}/${tabela}?filterByFormula=AND({A cnpj}='${cnpj}', {A token}='${token}', {A ativo}='SIM')`;
 
     const resposta = await fetch(url, {
       headers: { Authorization: `Bearer ${apiKey}` }
