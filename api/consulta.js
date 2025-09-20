@@ -1,6 +1,4 @@
 // /api/consulta.js
-console.log("⚙️ API /api/consulta chamada com:", req.method, req.query, req.body);
-
 export default async function handler(req, res) {
   let { tipo, cnpj, token } = req.query;
 
@@ -10,7 +8,6 @@ export default async function handler(req, res) {
     tipo = req.body.tipo || tipo;
   }
 
-  // Whitelist de tipo permitido
   if (tipo !== 'parceirosLogin') {
     return res.status(400).json({ erro: 'Tipo de consulta inválido.' });
   }
@@ -20,7 +17,6 @@ export default async function handler(req, res) {
     const tabela = process.env.AIRTABLE_PARCEIROS;
     const apiKey = process.env.AIRTABLE_API_KEY;
 
-    // ⚠️ Certifique-se de que os campos estão exatamente assim no Airtable
     const formula = `AND({A cnpj}='${cnpj}', {A token}='${token}', {A ativo}='SIM')`;
 
     const url = `https://api.airtable.com/v0/${baseId}/${tabela}?filterByFormula=${encodeURIComponent(formula)}`;
@@ -36,7 +32,6 @@ export default async function handler(req, res) {
     if (dados?.records?.length > 0) {
       const parceiro = dados.records[0].fields;
 
-      // 🔐 Limpeza da resposta
       return res.status(200).json({
         cnpj: parceiro["A cnpj"],
         nome: parceiro["A nome"] || "",
@@ -50,7 +45,5 @@ export default async function handler(req, res) {
   } catch (erro) {
     console.error("Erro interno:", erro);
     return res.status(500).json({ erro: "Erro interno do servidor." });
-console.error("🔥 ERRO consulta.js:", erro);
-
   }
 }
