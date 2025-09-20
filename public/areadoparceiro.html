@@ -122,14 +122,25 @@ body, html {
 function sanitizeCNPJ(v){ return (v||"").replace(/\D/g,""); }
 
 async function buscarParceiro(cnpj, token) {
-  const resp = await fetch('/api/consulta?tipo=parceirosLogin', {
+  async function buscarParceiro(cnpj, token) {
+  const resp = await fetch('/api/consulta', {
     method: 'POST',
     headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({
+      tipo: "parceirosLogin",
       cnpj: sanitizeCNPJ(cnpj),
       token: (token||"").trim()
     })
   });
+
+  if (!resp.ok) {
+    if (resp.status === 401) return null;
+    if (resp.status === 423) return "inativo";
+    throw new Error('Falha no servidor');
+  }
+
+  return await resp.json();
+}
 
   if (!resp.ok) {
     if (resp.status === 401) return null;     // credenciais inválidas
